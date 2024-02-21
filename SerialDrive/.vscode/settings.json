@@ -1,0 +1,11 @@
+{
+    "C_Cpp.errorSquiggles": "disabled",
+    "files.associations": {
+        "motor_encoder.h": "c",
+        "abotdefinitions.hpp": "c",
+        "abotconfiguration.hpp": "c",
+        "motor.hpp": "c",
+        "chrono": "c",
+        "complex": "c"
+    }
+}
