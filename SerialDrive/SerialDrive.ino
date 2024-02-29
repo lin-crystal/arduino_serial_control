@@ -33,7 +33,6 @@ void loop() {
     Serial.println();
   } else {
     inChar = inStr[0];    
-    //Serial.println(inStr);
     if (inChar == 'e') {
       Serial.println(read_encoder_values());
     } else if (inChar == 'm') {
@@ -41,7 +40,6 @@ void loop() {
       idx_1 = inStr.indexOf(' ', idx_0 + 1);
       left_comd = inStr.substring(idx_0 + 1, idx_1).toDouble();
       right_cmd = inStr.substring(idx_1 + 1, inStr.length()).toDouble();
-      //Serial.println("CMD: " + String(left_comd) + "," + String(right_cmd));
       set_motor_speeds(left_comd, right_cmd);
     }
   }
