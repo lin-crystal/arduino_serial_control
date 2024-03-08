@@ -31,7 +31,6 @@ class Motor {
         void brake(bool activate);
         void speed(int speed);
         
-        int direction();
         int directionPin();
         int brakePin();
         int speedPin();

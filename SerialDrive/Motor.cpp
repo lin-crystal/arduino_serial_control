@@ -29,6 +29,7 @@ void Motor::init(int pin_direction, int pin_brake, int pin_speed) {
         _pin_speed = pin_speed;
         pinMode(_pin_direction, OUTPUT);
         pinMode(_pin_brake, OUTPUT);
+        pinMode(_pin_speed, OUTPUT);
         forward();
         brake(false);
         speed(0);
@@ -59,13 +60,6 @@ void Motor::speed(int speed) {
     } else {
       analogWrite(_pin_speed, speed);
     }
-}
-
-int Motor::direction() {
-  if (digitalRead(_pin_brake) == 0)
-    return !digitalRead(_pin_direction);
-  else
-    return -1;
 }
 
 int Motor::directionPin() {

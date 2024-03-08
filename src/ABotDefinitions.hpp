@@ -17,4 +17,10 @@
 
 #define ABOT_MOTOR_SPEED_MAX    255
 
+#define WIND_UP     200
+// the commanded speed in ticks / period (here ticks / 100ms as PID runs with 10 Hz)
+// (see comment above: only positive speed is allowed)
+#define DESIRED_TICKS_DIFF_LEFT  35
+#define DESIRED_TICKS_DIFF_RIGHT 35
+
 #endif // _ABOT_DEFINITIONS_HPP_
