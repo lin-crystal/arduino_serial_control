@@ -15,6 +15,7 @@
 #include "MotorEncoder.hpp"
 
 double left_comd, right_cmd;
+int k_p, k_d, k_i;
 char inChar;
 String inStr;
 
@@ -23,8 +24,7 @@ void setup() {
   init_encoders();
   init_motors();
   Serial.begin(9600);
-  //Serial.setTimeout(33);
-  set_pid_values(2, 1, 0);
+  Serial.setTimeout(35);
 
   attachInterrupt(digitalPinToInterrupt(ABOT_PIN_MOTOR_LEFT_IN_A), left_wheel_pulse, CHANGE);
   attachInterrupt(digitalPinToInterrupt(ABOT_PIN_MOTOR_RIGHT_IN_B), right_wheel_pulse, CHANGE);
@@ -34,7 +34,45 @@ void setup() {
 }
 
 void loop() {
+  inStr = Serial.readStringUntil('\r');
+  int idx_0, idx_1, idx_2;
 
+  set_motor_speeds(5, 5);
+  delay(2000);
+  Serial.println(read_encoder_values());
+  set_motor_speeds(0, 0);
+  delay(5000);
+  Serial.println(read_encoder_values());
+  set_motor_speeds(-3, -3);
+  delay(2000);
+  Serial.println(read_encoder_values());
+  set_motor_speeds(0, 0);
+  delay(5000);
+  
+  /*
+  if (inStr.length() == 0) {
+    Serial.println();
+  } else {
+    inChar = inStr[0];    
+    if (inChar == 'e') {
+      Serial.println(read_encoder_values());
+    } else if (inChar == 'm') {
+      idx_0 = inStr.indexOf(' ');
+      idx_1 = inStr.indexOf(' ', idx_0 + 1);
+      left_comd = inStr.substring(idx_0 + 1, idx_1).toDouble();
+      right_cmd = inStr.substring(idx_1 + 1, inStr.length()).toDouble();
+      set_motor_speeds(left_comd, right_cmd);
+    } else if (inChar == 'u') {
+      idx_0 = inStr.indexOf(' ');
+      idx_1 = inStr.indexOf(':', idx_0 + 1);
+      idx_2 = inStr.indexOf(':', idx_1 + 1);
+      k_p = inStr.substring(idx_0 + 1, idx_1).toInt();
+      k_i = inStr.substring(idx_1 + 1, idx_2).toInt();
+      k_d = inStr.substring(idx_2 + 1, inStr.length()).toInt();
+      set_pid_values(k_p, k_i, k_d);
+    }
+  }
+  */
 }
 
 

@@ -95,8 +95,8 @@ void right_wheel_pulse()
 void set_motor_speeds(double left_wheel_command, double right_wheel_command)
 {   
 
-    int left_motor_speed = ceil(left_wheel_command * 18);
-    int right_motor_speed = ceil(right_wheel_command * 18);
+    int left_motor_speed = ceil(left_wheel_command * 20);
+    int right_motor_speed = ceil(right_wheel_command * 20);
 
     // Set motor directions
     if(int(left_motor_speed) == 0) {
