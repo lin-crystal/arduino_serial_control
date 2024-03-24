@@ -26,8 +26,8 @@ void setup() {
   Serial.begin(9600);
   Serial.setTimeout(35);
 
-  attachInterrupt(digitalPinToInterrupt(ABOT_PIN_MOTOR_LEFT_IN_A), left_wheel_pulse, CHANGE);
-  attachInterrupt(digitalPinToInterrupt(ABOT_PIN_MOTOR_RIGHT_IN_B), right_wheel_pulse, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(ABOT_PIN_MOTOR_LEFT_IN_A), cal_left_wheel_pulse, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(ABOT_PIN_MOTOR_RIGHT_IN_B), cal_right_wheel_pulse, CHANGE);
 
   // initialize timer 5 to trigger the PID controller
   initTimer5();

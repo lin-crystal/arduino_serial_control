@@ -5,10 +5,12 @@
 Motor motor_left = Motor();
 Motor motor_right = Motor();
 
+int left_motor_speed, right_motor_speed;
+
 // Initialize pulse counters
 volatile int left_wheel_pulse_count = 0;
-volatile int right_wheel_pulse_count = 0;
 volatile int left_wheel_pulse_count_old = LOW;
+volatile int right_wheel_pulse_count = 0;
 volatile int right_wheel_pulse_count_old = LOW;
 
 // variables used by the PID controller
@@ -36,8 +38,8 @@ void init_encoders() {
 void init_motors() {
     motor_left.init(ABOT_PIN_MOTOR_LEFT_DIRECTION, ABOT_PIN_MOTOR_LEFT_BRAKE, ABOT_PIN_MOTOR_LEFT_SPEED);
     motor_right.init(ABOT_PIN_MOTOR_RIGHT_DIRECTION, ABOT_PIN_MOTOR_RIGHT_BRAKE, ABOT_PIN_MOTOR_RIGHT_SPEED);
-    //motor_left.brake(true);
-    //motor_right.brake(true);
+    motor_left.brake(true);
+    motor_right.brake(true);
 }
 
 // Read wheel encoder values
@@ -47,7 +49,7 @@ String read_encoder_values()
 }
 
 // Left wheel callback function
-void left_wheel_pulse()
+void cal_left_wheel_pulse()
 {   
     // left wheel direction 
     // 1 - forward
@@ -69,7 +71,7 @@ void left_wheel_pulse()
 }
 
 // Right wheel callback function
-void right_wheel_pulse()
+void cal_right_wheel_pulse()
 {
     // right wheel direction 
     // 1 - forward,  
@@ -95,8 +97,8 @@ void right_wheel_pulse()
 void set_motor_speeds(double left_wheel_command, double right_wheel_command)
 {   
 
-    int left_motor_speed = ceil(left_wheel_command * 20);
-    int right_motor_speed = ceil(right_wheel_command * 20);
+    left_motor_speed = ceil(left_wheel_command * 18);
+    right_motor_speed = ceil(right_wheel_command * 18);
 
     // Set motor directions
     if(int(left_motor_speed) == 0) {
@@ -133,10 +135,10 @@ void handler(int signo)
 
 void set_pid_values(int pid_p, int pid_i, int pid_d) {
   KP_LEFT = pid_p;
-  KP_RIGHT = pid_p;
   KI_LEFT = pid_i;
-  KI_RIGHT = pid_i;
   KD_LEFT = pid_d;
+  KP_RIGHT = pid_p;
+  KI_RIGHT = pid_i;
   KD_RIGHT = pid_d;
 }
 
@@ -151,36 +153,42 @@ void process_pid_controller() {
   int e_right;
   int r_mot_right; 
 
-  return;
   //Serial.print("  readTicksLeft = ");Serial.print(left_wheel_pulse_count);
   //Serial.print(", readTicksRight = ");Serial.print(right_wheel_pulse_count);
   
   // determine ticks since last cycle
   readTicksLeft     = left_wheel_pulse_count;
   actTicksDiffLeft  = readTicksLeft - previousTicksLeft;
+  previousTicksLeft = readTicksLeft;
 
   readTicksRight    = right_wheel_pulse_count;
   actTicksDiffRight = readTicksRight - previousTicksRight;
-
-  // control left wheel
-  e_left = DESIRED_TICKS_DIFF_LEFT - actTicksDiffLeft;
+  previousTicksRight = readTicksRight;
+  
+  //Serial.print("  actTicksDiffLeft = ");Serial.print(actTicksDiffLeft);
+  //Serial.print(", actTicksDiffRight = ");Serial.print(actTicksDiffRight);
+  
+  e_left = DESIRED_TICKS_DIFF_LEFT - abs(actTicksDiffLeft);
 
   // integrate error sum and handle wind-up effect
   integral_left += e_left;
-  integral_left   = max(integral_left, -WIND_UP);
-  integral_left   = min(integral_left,  WIND_UP);
+  integral_left = max(integral_left, -WIND_UP);
+  integral_left = min(integral_left,  WIND_UP);
 
   // now do PID control
   r_mot_left = KP_LEFT * e_left
-             + KI_LEFT * integral_left
-             + KD_LEFT * (e_left - e_old_left);
+            + KI_LEFT * integral_left
+            + KD_LEFT * (e_left - e_old_left);
 
   // remember the values for the next cycle
-  e_old_left        = e_left;
-  previousTicksLeft = readTicksLeft;
+  e_old_left = e_left;
+
+  // limit the motor output to the range allowed with analogWrite()
+  if (r_mot_left > 255) r_mot_left = 255;
+  if (r_mot_left < 0)   r_mot_left = 0;  
 
   // control right wheel
-  e_right = DESIRED_TICKS_DIFF_RIGHT - actTicksDiffRight;
+  e_right = DESIRED_TICKS_DIFF_RIGHT - abs(actTicksDiffRight);
 
   // integrate error sum and handle wind-up effect
   integral_right += e_right;
@@ -193,28 +201,16 @@ void process_pid_controller() {
               + KD_RIGHT * (e_right - e_old_right);
 
   // remember the values for the next cycle
-  e_old_right        = e_right;
-  previousTicksRight = readTicksRight;
-
-  //Serial.print("  r_mot_left = ");Serial.print(r_mot_left);
-  //Serial.print(", r_mot_right = ");Serial.println(r_mot_right);
+  e_old_right = e_right;
 
   // limit the motor output to the range allowed with analogWrite()
-  // this is here where you need to manage the "direction" input of the H-bridge in case of negative speed    
-  if (r_mot_left > 255) r_mot_left = 255;
-  if (r_mot_left < 0)   r_mot_left = 0;
-
   if (r_mot_right > 255) r_mot_right = 255;
   if (r_mot_right < 0)   r_mot_right = 0;
   
-  //if (r_mot_left != 0) motor_left.brake(false);
-  //if (r_mot_right != 0) motor_right.brake(false);
-  // now set new motor values
-  motor_left.speed(r_mot_left);
-  motor_right.speed(r_mot_right);
+  //Serial.print(";  r_mot_left = ");Serial.print(r_mot_left);
+  //Serial.print(", r_mot_right = ");Serial.println(r_mot_right);
 
-  //Serial.print("  motor left = ");Serial.print(r_mot_left);
-  //Serial.print("  current ticks/round = ");Serial.print(actTicksDiffLeft);
-  //Serial.print("  motor right = ");Serial.print(r_mot_right);
-  //Serial.print("  current ticks/round = ");Serial.println(actTicksDiffRight);
+  // now set new motor values
+  if (abs(left_motor_speed) < r_mot_left) motor_left.speed(r_mot_left);
+  if (abs(right_motor_speed) < r_mot_right) motor_right.speed(r_mot_right);
 }

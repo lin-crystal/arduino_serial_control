@@ -12,7 +12,7 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 
-#include "MotorEncoder.hpp"
+#include <MotorEncoder.h>
 
 double left_comd, right_cmd;
 int k_p, k_d, k_i;
@@ -26,8 +26,8 @@ void setup() {
   Serial.begin(9600);
   Serial.setTimeout(35);
 
-  attachInterrupt(digitalPinToInterrupt(ABOT_PIN_MOTOR_LEFT_IN_A), left_wheel_pulse, CHANGE);
-  attachInterrupt(digitalPinToInterrupt(ABOT_PIN_MOTOR_RIGHT_IN_B), right_wheel_pulse, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(ABOT_PIN_MOTOR_LEFT_IN_A), cal_left_wheel_pulse, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(ABOT_PIN_MOTOR_RIGHT_IN_B), cal_right_wheel_pulse, CHANGE);
 
   // initialize timer 5 to trigger the PID controller
   initTimer5();
@@ -37,17 +37,16 @@ void loop() {
   inStr = Serial.readStringUntil('\r');
   int idx_0, idx_1, idx_2;
 
-  set_motor_speeds(5, 5);
+  set_motor_speeds(5, -5);
   delay(2000);
-  Serial.println(read_encoder_values());
-  set_motor_speeds(0, 0);
+  set_motor_speeds(1, -1);
   delay(5000);
-  Serial.println(read_encoder_values());
-  set_motor_speeds(-3, -3);
-  delay(2000);
-  Serial.println(read_encoder_values());
-  set_motor_speeds(0, 0);
-  delay(5000);
+  //Serial.println(read_encoder_values());
+  //set_motor_speeds(-3, -3);
+  //delay(2000);
+  //Serial.println(read_encoder_values());
+  //set_motor_speeds(0, 0);
+  //delay(5000);
   
   /*
   if (inStr.length() == 0) {

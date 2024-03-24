@@ -10,8 +10,8 @@
 
 void init_encoders();
 void init_motors();
-void left_wheel_pulse();
-void right_wheel_pulse();
+void cal_left_wheel_pulse();
+void cal_right_wheel_pulse();
 void set_motor_speeds(double left_wheel_command, double right_wheel_command);
 String read_encoder_values();
 
